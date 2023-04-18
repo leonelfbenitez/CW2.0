@@ -1,0 +1,5 @@
+pip install flask
+No need to install sqlite3 module. It is included in the standard library (since Python 2.5)
+
+
+# References:
