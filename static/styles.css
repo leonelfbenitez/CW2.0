@@ -1,0 +1,79 @@
+.frame {
+	background-color: #000732;
+	position: relative;
+	width: auto;
+	-ms-overflow-style: none;  /* Hide scrollbar for IE and Edge */
+	scrollbar-width: none;  /* Hide scrollbar for Firefox */
+  }
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.frame::-webkit-scrollbar {
+	display: none;
+  }
+
+/*  top section */
+.header {
+	background-color: #1BAECE;
+	border-radius: 5px;
+	display: relative;
+	width: 100%;
+}
+
+.logo {
+	height: 200px;
+    width: 200px;
+}
+
+.cart {
+	background-color: #427BD2;
+	border: 2px solid #000732;
+	border-radius: 5px;
+	font-family: 'Inter';
+	font-weight: bold;
+	height: 25px;
+	margin: 5px;
+	padding: 5px;
+	position: absolute;
+	right: 0px;
+	top: 0px;
+	width: 100px;
+}
+
+#cartIcon {
+	height: 20px;
+	width: 20px;
+}
+
+/* Top Buttons */
+.top_btns {
+	border-radius: 5px;
+	float: right;
+	margin: 5px;
+	position:absolute;
+	right: 125px;
+	top: 0px;
+  }
+
+.btn {
+	text-align: center;
+	background-color: #427BD2;
+	border: 2px solid #000732;
+	border-radius: 5px;
+	font-family: 'Inter';
+	font-weight: bold;
+	height: 35px;
+	width: 125px;
+  }
+  
+ 
+  .top_btns .btn:hover {
+	-moz-box-shadow: 1px 3px 5px rgba(0, 0, 0, 0.2);
+	-moz-transform: scale(1.1);
+	-ms-transform: scale(1.1);
+	-o-transform: scale(1.1);
+	-webkit-box-shadow: 1px 3px 5px rgba(0, 0, 0, 0.2);
+	-webkit-transform: scale(1.1);
+	box-shadow: 1px 3px 5px rgba(0, 0, 0, 0.2);
+	cursor: pointer;
+	transform: scale(1.1);
+  }

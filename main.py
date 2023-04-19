@@ -1,6 +1,6 @@
 from flask import *
 import sqlite3, hashlib, os
-
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 app.secret_key = 'random string'
@@ -45,33 +45,33 @@ def admin():
     conn.close()
     return render_template('add.html', categories=categories)
 
-# @app.route("/addItem", methods=["GET", "POST"])
-# def addItem():
-#     if request.method == "POST":
-#         name = request.form['name']
-#         price = float(request.form['price'])
-#         description = request.form['description']
-#         stock = int(request.form['stock'])
-#         categoryId = int(request.form['category'])
+@app.route("/addItem", methods=["GET", "POST"])
+def addItem():
+    if request.method == "POST":
+        name = request.form['name']
+        price = float(request.form['price'])
+        description = request.form['description']
+        stock = int(request.form['stock'])
+        categoryId = int(request.form['category'])
 
-#         #Uploading image procedure
-#         image = request.files['image']
-#         if image and allowed_file(image.filename):
-#             filename = secure_filename(image.filename)
-#             image.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-#         imagename = filename
-#         with sqlite3.connect('database.db') as conn:
-#             try:
-#                 cur = conn.cursor()
-#                 cur.execute('''INSERT INTO products (name, price, description, image, stock, categoryId) VALUES (?, ?, ?, ?, ?, ?)''', (name, price, description, imagename, stock, categoryId))
-#                 conn.commit()
-#                 msg="added successfully"
-#             except:
-#                 msg="error occured"
-#                 conn.rollback()
-#         conn.close()
-#         print(msg)
-#         return redirect(url_for('root'))
+        #Uploading image procedure
+        image = request.files['image']
+        if image and allowed_file(image.filename):
+            filename = secure_filename(image.filename)
+            image.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        imagename = filename
+        with sqlite3.connect('database.db') as conn:
+            try:
+                cur = conn.cursor()
+                cur.execute('''INSERT INTO products (name, price, description, image, stock, categoryId) VALUES (?, ?, ?, ?, ?, ?)''', (name, price, description, imagename, stock, categoryId))
+                conn.commit()
+                msg="added successfully"
+            except:
+                msg="error occured"
+                conn.rollback()
+        conn.close()
+        print(msg)
+        return redirect(url_for('root'))
 
 @app.route("/remove")
 def remove():
@@ -339,4 +339,4 @@ def parse(data):
     return ans
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port='4000', debug=True)
+    app.run(debug=True)
