@@ -1,48 +1,167 @@
+# https://www.pythontutorial.net/python-basics/python-check-if-file-exists/
 import sqlite3
+import os.path
 
-#Open database
-conn = sqlite3.connect('database.db')
+if not os.path.exists("data/database.db"):
 
-#Create table
-conn.execute('''CREATE TABLE users 
-		(userId INTEGER PRIMARY KEY, 
-		password TEXT,
-		email TEXT,
-		firstName TEXT,
-		lastName TEXT,
-		address1 TEXT,
-		address2 TEXT,
-		zipcode TEXT,
-		city TEXT,
-		state TEXT,
-		country TEXT, 
-		phone TEXT
-		)''')
+# customer table
+	conn = sqlite3.connect("data/database.db")
+	cursor = conn.cursor()
 
-conn.execute('''CREATE TABLE products
-		(productId INTEGER PRIMARY KEY,
-		name TEXT,
-		price REAL,
+	SQL_STATEMENT = """CREATE TABLE customer (
+		cust_id INTEGER PRIMARY KEY AUTOINCREMENT,
+		email VARCHAR(50),
+		pass VARCHAR(30),
+		fname VARCHAR(30),
+		lname VARCHAR(30),
+		phone VARCHAR(40),
+		sign_up TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+	);"""
+
+	cursor.execute(SQL_STATEMENT)
+	conn.commit()
+	conn.close()
+
+# shipping table
+	cursor = None
+	conn = None
+	
+	conn = sqlite3.connect("data/database.db")
+	cursor = conn.cursor()
+
+	SQL_STATEMENT = """CREATE TABLE shipping (
+		ship_id INTEGER PRIMARY KEY AUTOINCREMENT,
+		address TEXT,
+		state CHAR(2),
+		zip CHAR(9),
+		apt_num VARCHAR(20),
+		in_dt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+		cust_id INTEGER NOT NULL,
+		FOREIGN KEY (cust_id) REFERENCES customer(cust_id)
+	);"""
+
+	cursor.execute(SQL_STATEMENT)
+	conn.commit()
+	conn.close()
+
+# service table 
+	cursor = None
+	conn = None
+	
+	conn = sqlite3.connect("data/database.db")
+	cursor = conn.cursor()
+	
+	SQL_STATEMENT = """CREATE TABLE service (
+		serv_id INTEGER PRIMARY KEY AUTOINCREMENT,
+		dtype VARCHAR(20),
+		dbrand VARCHAR(20),
+		dmodel VARCHAR(20),
+		dserial VARCHAR(20),
+		idescript TEXT,
+		repair_serv BOOLEAN DEFAULT 0,
+		data_serv BOOLEAN DEFAULT 0,
+		virus_serv BOOLEAN DEFAULT 0,
+		diagn_serv BOOLEAN DEFAULT 0,
+		softwr_serv BOOLEAN DEFAULT 0,
+		install_serv BOOLEAN DEFAULT 0,
+		serv_dt  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+		cust_id INTEGER NOT NULL,
+		FOREIGN KEY (cust_id) REFERENCES customer(cust_id)
+	);"""
+
+	cursor.execute(SQL_STATEMENT)
+	conn.commit()
+	conn.close()
+
+# recycle table
+	cursor = None
+	conn = None
+	
+	conn = sqlite3.connect("data/database.db")
+	cursor = conn.cursor()
+
+	SQL_STATEMENT = """CREATE TABLE recycle (
+		recyc_id INTEGER PRIMARY KEY AUTOINCREMENT,
+		recyc_dt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+		cust_id INTEGER NOT NULL,
+		FOREIGN KEY (cust_id) REFERENCES customer(cust_id)
+	);"""
+
+	cursor.execute(SQL_STATEMENT)
+	conn.commit()
+	conn.close()
+
+# inventory table
+	cursor = None
+	conn = None
+	
+	conn = sqlite3.connect("data/database.db")
+	cursor = conn.cursor()
+
+	# or REAL for decimal
+	SQL_STATEMENT = """CREATE TABLE inventory (
+		item_id INTEGER PRIMARY KEY AUTOINCREMENT,
+		item VARCHAR(50),
 		description TEXT,
+		category TEXT,
+		url VARCHAR(100),
 		image TEXT,
-		stock INTEGER,
-		categoryId INTEGER,
-		FOREIGN KEY(categoryId) REFERENCES categories(categoryId)
-		)''')
+		price DECIMAL(10, 2), 
+		inventory INTEGER, 
+		in_dt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+	);"""
 
-conn.execute('''CREATE TABLE kart
-		(userId INTEGER,
-		productId INTEGER,
-		FOREIGN KEY(userId) REFERENCES users(userId),
-		FOREIGN KEY(productId) REFERENCES products(productId)
-		)''')
+	cursor.execute(SQL_STATEMENT)
+	conn.commit()
+	conn.close()
 
-conn.execute('''CREATE TABLE categories
-		(categoryId INTEGER PRIMARY KEY,
-		name TEXT
-		)''')
+# cart table
+	cursor = None
+	conn = None
+	
+	conn = sqlite3.connect("data/database.db")
+	cursor = conn.cursor()
+
+	SQL_STATEMENT = """CREATE TABLE cart (
+		cust_id INTEGER NOT NULL,
+		item_id INTEGER NOT NULL,
+		FOREIGN KEY (cust_id) REFERENCES customer(cust_id),
+		FOREIGN KEY (item_id) REFERENCES inventory(item_id)
+	);"""
+
+	cursor.execute(SQL_STATEMENT)
+	conn.commit()
+	conn.close()
+
+# order/history table
+	cursor = None
+	conn = None
+	
+	conn = sqlite3.connect("data/database.db")
+	cursor = conn.cursor()
+
+	SQL_STATEMENT = """CREATE TABLE orders (
+		or_id INTEGER PRIMARY KEY AUTOINCREMENT,
+		cust_id INTEGER NOT NULL,
+		total DECIMAL(10, 2),
+		ship_id INTEGER NOT NULL,
+		or_dt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+		FOREIGN KEY (cust_id) REFERENCES customer(cust_id),
+		FOREIGN KEY (ship_id) REFERENCES shipping(ship_id)
+	);"""
+	
+	cursor.execute(SQL_STATEMENT)
+	conn.commit()
+	conn.close()
+	
+else:
+	conn = sqlite3.connect("data/database.db")
+	conn.close()
 
 
 
-conn.close()
+
+
+
+
 

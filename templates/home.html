@@ -2,6 +2,8 @@
 <html>
 
 <head>
+    <script src="jquery-3.6.4.min.js"></script>
+    <script src="/static/scripts.js"></script>
     <link rel="stylesheet" href="static/styles.css">
 	
 	<title>Computer World Online Computer Center!</title>
@@ -15,11 +17,6 @@
         <img class ="logo" href="/" src="/static/pics/Computer-World-logos_transparent.png" alt="Computer-World-logo">
 
         <!-- Top/Right header button section -->
-
-        <!-- Login -->
-        <article class="top_btns">
-            <input type="button" class="btn" onclick="window.location.href='/loginForm'" value="Login">
-        </article>
 
         <!-- Cart -->
         <article class="cart">
@@ -36,10 +33,18 @@
             </form>
         </article>
 
+        <!-- Login -->
+        <article class="top_btns">
+            <input type="button" class="btn" onclick="login()" value="Account"> 
+            <!-- <input type="button" class="btn" onclick="window.location.href='/account/profile'" value="Account"> -->
+        </article>
+
         <!-- Sign In -->
         {% if not loggedIn %}
-        <div id="signInButton">
-            <a class="link" href="/loginForm">Sign In</a>
+        <div id="signInButton" class="top_btns">
+            <!-- <a class="link" href="/loginForm">Sign In</a> -->
+            <!-- <input type="button" class="btn" onclick="window.location.href='/loginForm'" value="Login"> -->
+            <input type="button" class="btn" onclick="" value="Login">
         </div>
         {% else %}
         <div class="dropdown">
@@ -52,7 +57,7 @@
             </div>
         </div>
         {% endif %}
-
+        <input type="hidden" id="login_stat" name="login_stat" value="2">
     </section>
 
     <div class="display">
