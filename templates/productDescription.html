@@ -57,18 +57,18 @@
                 </tr>
                 <tr>
                     <td>Price</td>
-                    <td>${{data[2]}}</td>
+                    <td>${{data[6]}}</td>
                 </tr>
                 <tr>
                     <td>Stock</td>
-                    <td>{{data[5]}}</td>
+                    <td>{{data[7]}}</td>
                 </tr>
             </table>
             <h2>Description</h2>
-            <p>{{data[3]}}</p>
+            <p>{{data[2]}}</p>
         </div>
         <div id="addToCart">
-            <a href="/addToCart?productId={{request.args.get('productId')}}">Add to Cart</a>
+            <a href="/addToCart?item_id={{request.args.get('item_id')}}">Add to Cart</a>
         </div>
     </div>
 </body>

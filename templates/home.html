@@ -2,11 +2,19 @@
 <html>
 
 <head>
+    <script src="jquery-3.6.4.min.js"></script>
+    <script src="/static/scripts.js"></script>
     <link rel="stylesheet" href="static/styles.css">
 	
 	<title>Computer World Online Computer Center!</title>
 </head>
-
+<nav>
+    <ul class="navbar">
+        <li><a href="/">Home</a></li>
+        <li><a href="/recycle.html">Recycle</a></li>
+        <li><a href="service.html">Service</a></li>
+    </ul>
+</nav>
 <body class="frame">
 
     <section class="header">
@@ -16,30 +24,30 @@
 
         <!-- Top/Right header button section -->
 
-        <!-- Login -->
-        <article class="top_btns">
-            <input type="button" class="btn" onclick="window.location.href='/loginForm'" value="Login">
-        </article>
-
         <!-- Cart -->
         <article class="cart">
             <a href="/cart">
                 <img id="cartIcon" src="/static/pics/cart.png" /> Items: {{noOfItems}}
             </a>
         </article>
-
+        <hr>
+        <p style:"{color:red;}">{{ products }}</p>
+        <hr>
         <!-- Search Box -->
-        <article>
-            <form>
-                <input id="searchBox" type="text" name="searchQuery">
-                <input id="searchButton" type="submit" value="Search">
-            </form>
+    
+
+        <!-- Login -->
+        <article class="top_btns">
+            <input type="button" class="btn" onclick="login()" value="Account"> 
+            <!-- <input type="button" class="btn" onclick="window.location.href='/account/profile'" value="Account"> -->
         </article>
 
         <!-- Sign In -->
         {% if not loggedIn %}
-        <div id="signInButton">
-            <a class="link" href="/loginForm">Sign In</a>
+        <div id="signInButton" class="top_btns">
+            <!-- <a class="link" href="/loginForm">Sign In</a> -->
+            <!-- <input type="button" class="btn" onclick="window.location.href='/loginForm'" value="Login"> -->
+            <input type="button" class="btn" onclick="" value="Login">
         </div>
         {% else %}
         <div class="dropdown">
@@ -52,7 +60,7 @@
             </div>
         </div>
         {% endif %}
-
+        <input type="hidden" id="login_stat" name="login_stat" value="2">
     </section>
 
     <div class="display">
@@ -60,7 +68,7 @@
             <h2>Shop by Category: </h2>
             <ul>
                 {% for row in categoryData %}
-                <li><a href="/displayCategory?categoryId={{row[0]}}">{{row[1]}}</a></li>
+                <li><a href="/displayCategory?category={{row[1]}}">{{row[1]}}</a></li>
                 {% endfor %}
             </ul>
         </div>
@@ -69,27 +77,37 @@
             {% for data in itemData %}
             <table>
                 <tr id="productName">
-                    {% for row in data %}
+                    
                     <td>
-                        {{row[1]}}
+                        Nvidia 4080
                     </td>
-                    {% endfor %}
+                   <td>
+                        RTX 4070
+                   </td>
+                   <td>
+                        Dell Moniter
+                   </td>
                 </tr>
                 <tr id="productImage">
                     {% for row in data %}
                     <td>
-                        <a href="/productDescription?productId={{row[0]}}">
-                            <img src={{ url_for('static', filename='uploads/' + row[4]) }} id="itemImage" />
+                        <a href="/itemInformation?item_id={{row[0]}}">
+                            <img src={{ url_for('static', filename='static/uploads' + row[5]) }} id="itemImage" />
                         </a>
                     </td>
                     {% endfor %}
                 </tr>
                 <tr id="productPrice">
-                    {% for row in data %}
+                    
                     <td>
-                        ${{row[2]}}
+                        $1000
                     </td>
-                    {% endfor %}
+                    <td>
+                        $1500
+                    </td>
+                    <td>
+                        $300
+                    </td>
                 </tr>
             </table>
             {% endfor %}
