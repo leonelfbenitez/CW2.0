@@ -1,6 +1,8 @@
 from flask import *
 import sqlite3, hashlib, os
 from werkzeug.utils import secure_filename
+import logging
+
 
 # flask app initiated
 app = Flask(__name__)
@@ -30,7 +32,7 @@ def parse(data):
         curr = [] # set array to store values per record
         
         # iterate the number of columns
-        for j in range(8):
+        for j in range(9):
 
             # if row iteration is over limit
             if i >= len(data):
@@ -45,6 +47,7 @@ def parse(data):
     
     # return total records
     return ans
+
 
 # function to retrieve customer's login status
 def getLoginDetails():
@@ -65,21 +68,23 @@ def getLoginDetails():
             cursor = conn.cursor()
 
             # from session, get customer's info
-            cursor.execute("SELECT email, fname, lname FROM users WHERE email = ?", session['email'])
-            email, fname, lname = cursor.fetchall()
-            
+            cursor.execute("SELECT cust_id, fname, lname FROM customer WHERE email = ?;", session['email'])
+            cust_id, fname, lname = cursor.fetchall()
+
             # from session, get cart info
-            cursor.execute("SELECT count(productId) FROM cart WHERE userId = ?", session['email'])
+            cursor.execute("SELECT count(item_id) FROM cart WHERE userId = ?;", cust_id)
             noOfItems = cursor.fetchone()[0]
 
             # close connection to db
             cursor.close()
             conn.close()
             loggedIn = True
-
-            # return data to caller
-            return (loggedIn, fname, lname, noOfItems)
-        
+            msg ={
+                'msg:' + str(cust_id)
+            }
+            resp = jsonify(msg)
+            return resp
+  
         # if any errors/exceptions
         except Exception as e:
             
@@ -94,6 +99,11 @@ def getLoginDetails():
             resp = jsonify(msg)
             resp.status_code = 500
             return resp
+
+    # return data to caller
+    return (loggedIn, fname, lname, noOfItems)
+
+
 # function to verify login is valid:
 def is_valid(email, password):
 
@@ -103,8 +113,8 @@ def is_valid(email, password):
         cursor = conn.cursor()
 
         # retrieve email and password from customer table
-        cursor.execute('SELECT email, pass FROM customer')
-        data = cursor.fetchall()
+        cursor.execute('SELECT email, pass FROM customer WHERE email = ?;', session['email'])
+        data = cursor.fetchone()
 
         # close connection to db
         cursor.close()
@@ -137,13 +147,14 @@ def is_valid(email, password):
         resp.status_code = 500
         return resp
 
+
 # home/index route
 @app.route("/")
 def root():
     try:
         # get custome'r login session status
-        loggedIn, fname, lname, noOfItems = getLoginDetails()
-        
+        # loggedIn, fname, lname, noOfItems = getLoginDetails() or (False, '', '', 0)
+
         # open connection to db
         conn = sqlite3.connect('data/database.db')
         cursor = conn.cursor()
@@ -153,8 +164,6 @@ def root():
         itemData = cursor.fetchall()
         data = parse(itemData)   
         
-        print(fname)
-
         # get categories for all items
         cursor.execute('SELECT DISTINCT category FROM inventory')
         categories = cursor.fetchall()
@@ -164,11 +173,11 @@ def root():
         conn.close()
 
         # return data to frontend
-        return render_template('home.html', itemData=data, loggedIn=loggedIn, firstName=fname, lastName=lname, noOfItems=noOfItems, categoryData=categories)
+        #  loggedIn=loggedIn, firstName=fname, lastName=lname, noOfItems=noOfItems,
+        return render_template('home.html', itemData=data, categoryData=categories)
 
     # if any errors/exceptions
-    except Exception as e:
-        
+    except Exception as e:  
         msg = {
             'status': 500,
             'message': 'Error 3: ' + str(e)
@@ -348,7 +357,7 @@ def displayCategory():
     
     try:        
         # get customer's login status
-        loggedIn, fname, lname, noOfItems = getLoginDetails()
+        loggedIn, fname, lname, noOfItems = getLoginDetails() or (False, '', '', 0)
 
         # get selected category from frontend
         categoryId = request.args.get("categoryId")
@@ -408,7 +417,7 @@ def profileHome():
         results = cursor.fetchall()
 
         # get custome'r login session status
-        loggedIn, fname, lname, noOfItems = getLoginDetails()
+        loggedIn, fname, lname, noOfItems = getLoginDetails() or (False, '', '', 0)
 
         # close connection to db
         cursor.close()    
@@ -445,7 +454,7 @@ def editProfile():
     # else customer is already logged in:
 
     # get customer's login status
-    loggedIn, fname, lname, noOfItems = getLoginDetails()
+    loggedIn, fname, lname, noOfItems = getLoginDetails() or (False, '', '', 0)
     
     
     try:
@@ -674,7 +683,7 @@ def login():
 def productDescription():
 
     # get customer login status
-    loggedIn, fname, lname, noOfItems = getLoginDetails()
+    loggedIn, fname, lname, noOfItems = getLoginDetails() or (False, '', '', 0)
 
     # get the item_id selected from frontend
     item_id = request.args.get('item_id')
@@ -786,7 +795,7 @@ def cart():
     
     # else customer is already logged in:
     # get customer login status
-    loggedIn, fname, lname, noOfItems = getLoginDetails()
+    loggedIn, fname, lname, noOfItems = getLoginDetails() or (False, '', '', 0)
     
     # get current customer's session email; login info
     email = session['email']
@@ -916,9 +925,10 @@ def register():
         lname = request.form['lastName']
         phone = request.form['phone']
         address = request.form['address']
-        state = request.form['state']
-        zip = request.form['zipcode']
         apt_num = request.form['apt_num']
+        city = request.form['city']
+        state = request.form['state']
+        zip = request.form['zip']
 
         try:
             # open connection to db
@@ -930,7 +940,7 @@ def register():
             conn.commit()
 
             # insert info into shipping table
-            cursor.execute('INSERT INTO shipping (address, state, zip, apt_num) VALUES (?, ?, ?, ?)', address, state, zip, apt_num)
+            cursor.execute('INSERT INTO shipping (address, apt_num, city, state, zip) VALUES (?, ?, ?, ?, ?)', address, apt_num, city, state, zip)
             conn.commit()
 
             # OK

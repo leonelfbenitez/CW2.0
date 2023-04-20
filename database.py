@@ -32,9 +32,10 @@ if not os.path.exists("data/database.db"):
 	SQL_STATEMENT = """CREATE TABLE shipping (
 		ship_id INTEGER PRIMARY KEY AUTOINCREMENT,
 		address TEXT,
+		apt_num VARCHAR(20),
+		city VARCHAR(30),
 		state CHAR(2),
 		zip CHAR(9),
-		apt_num VARCHAR(20),
 		in_dt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 		cust_id INTEGER NOT NULL,
 		FOREIGN KEY (cust_id) REFERENCES customer(cust_id)
