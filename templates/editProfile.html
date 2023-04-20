@@ -44,16 +44,15 @@
     <div class="display">
         <h2>Edit profile</h2>
         <form action="/updateProfile" method="POST">
-            <p>Email:<input type="email" name="email" value={{profileData[1]}} readonly="readonly"></p>
-            <p>First Name:<input type="text" name="firstName" value={{profileData[2]}}></p>
-            <p>Last Name: <input type="text" name="lastName" value={{profileData[3]}}></p>
-            <p>Address 1: <input type="text" name="address1" value={{profileData[4]}}></p>
-            <p>Address 2: <input type="text" name="address2" value={{profileData[5]}}></p>
-            <p>Zip Code: <input type="text" name="zipcode" value={{profileData[6]}}></p>
-            <p>City: <input type="text" name="city" value={{profileData[7]}}></p>
-            <p>State: <input type="text" name="state" value={{profileData[8]}}></p>
-            <p>Country: <input type="text" name="country" value={{profileData[9]}}></p>
-            <p>Phone Number: <input type="text" name="phone" value={{profileData[10]}}></p>
+            <p>Email:<input type="email" name="email" value={{cust_info[1]}} readonly="readonly"></p>
+            <p>First Name:<input type="text" name="firstName" value={{cust_info[2]}}></p>
+            <p>Last Name: <input type="text" name="lastName" value={{cust_info[3]}}></p>
+            <p>Phone Number: <input type="text" name="phone" value={{cust_info[4]}}></p>
+            <p>Address: <input type="text" name="address" value={{ship_info[0]}}></p>
+            <p>Address 2/Appartment Number: <input type="text" name="apt_num" value={{ship_info[1]}}></p>
+            <p>City: <input type="text" name="city" value={{ship_info[2]}}></p>
+            <p>State: <input type="text" name="state" value={{ship_info[3]}}></p>
+            <p>Zip Code: <input type="text" name="zip" value={{ship_info[4]}}></p>
             <input type="submit" value="Save">
         </form>
     </div>

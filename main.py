@@ -128,10 +128,6 @@ def is_valid(email, password):
 
     # if any errors/exceptions
     except Exception as e:
-
-        # close connection to db
-        cursor.close()    
-        conn.close()
         
         msg = {
             'status': 500,
@@ -147,7 +143,11 @@ def is_valid(email, password):
 def root():
     try:
         # get custome'r login session status
-        loggedIn, fname, lname, noOfItems = getLoginDetails()
+        # loggedIn, fname, lname, noOfItems = getLoginDetails()
+        fname = ''
+        lname = ''
+        noOfItems = 0
+        loggedIn = False
 
         # open connection to db
         conn = sqlite3.connect('data/database.db')
@@ -444,9 +444,9 @@ def profileHome():
         return resp
 
 
-# edit customer's info route
-@app.route("/account/profile/edit")
-def editProfile():
+# view customer's info route
+@app.route("/account/profile/view")
+def viewProfile():
 
     # if customer not logged in; not found in current session
     if 'email' not in session:
@@ -457,7 +457,7 @@ def editProfile():
     # else customer is already logged in:
 
     # get customer's login status
-    loggedIn, fname, lname, noOfItems = getLoginDetails() or (False, '', '', 0)
+    loggedIn, fname, lname, noOfItems = getLoginDetails()
     
     
     try:
@@ -474,7 +474,61 @@ def editProfile():
         conn.close()
 
         # return info to frontend
-        return render_template("editProfile.html", data=results, loggedIn=loggedIn, firstName=fname, lastName=lname, noOfItems=noOfItems)
+        return render_template("viewProfile.html", data=results, loggedIn=loggedIn, firstName=fname, lastName=lname, noOfItems=noOfItems)
+
+    # if any errors/exceptions
+    except Exception as e:
+
+        # close connection to db
+        cursor.close()    
+        conn.close()
+
+        msg = {
+            'status': 500,
+            'message': 'Error 10: ' + str(e)
+        }
+        resp = jsonify(msg)
+        resp.status_code = 500
+        return resp
+
+
+# edit customer's info route
+@app.route("/account/profile/edit")
+def editProfile():
+
+    # if customer not logged in; not found in current session
+    if 'email' not in session:
+
+        # redirect cutomer to home page
+        return redirect(url_for('root'))
+    
+    # else customer is already logged in:
+
+    # get customer's login status
+    loggedIn, fname, lname, noOfItems = getLoginDetails()
+    
+    
+    try:
+        # open connection to db
+        conn = sqlite3.connect('data/database.db')
+        cursor = conn.cursor()
+
+        # get customer's info
+        cursor.execute("SELECT cust_id, email, fname, lname, phone, sign_up FROM customer WHERE email = ?;", (session['email'], ))
+        customerInfo = cursor.fetchone()
+
+        cust_id = customerInfo[0]
+ 
+        # get customer's shipping info
+        cursor.execute("SELECT address, apt_num, city, state, zip FROM shipping WHERE cust_id = ?;", (cust_id, ))
+        shippingInfo = cursor.fetchone()
+
+        # close connection to db
+        cursor.close()
+        conn.close()
+
+        # return info to frontend
+        return render_template("editProfile.html", cust_info=customerInfo, ship_info=shippingInfo, loggedIn=loggedIn, firstName=fname, lastName=lname, noOfItems=noOfItems)
 
     # if any errors/exceptions
     except Exception as e:
@@ -601,9 +655,10 @@ def updateProfile():
         lname = request.form['lastName']
         phone = request.form['phone']
         address = request.form['address']
+        apt_num = request.form['apt_num']
+        city = request.form['city']
         state = request.form['state']
         zip = request.form['zip']
-        apt_num = request.form['apt_num']
 
         try: 
             # open connection to db
@@ -611,12 +666,28 @@ def updateProfile():
             cursor = conn.cursor()
 
             # update customer table with POST values
-            cursor.execute("UPDATE customer SET fname = ?, lname = ?, phone = ? WHERE email = ?", fname, lname, phone, session['email'])
+            cursor.execute("UPDATE customer SET fname = ?, lname = ?, phone = ? WHERE email = ?", (fname, lname, phone, session['email']))
             conn.commit()
 
+            cursor.close()
+            conn.close()
+
+            cursor = None
+            conn = None
+
+            # open connection to db
+            conn = sqlite3.connect('data/database.db')
+            cursor = conn.cursor()
+
+            # get cust_id from customer table
+            cursor.execute("SELECT cust_id FROM customer WHERE email = ?;", (session['email'], ))
+            customerInfo = cursor.fetchone()
+            cust_id = customerInfo[0]
+
             # update shipping table with POST values
-            cursor.execute("UPDATE shipping SET address = ?, state = ?, zip = ?, apt_num WHERE email = ?", address, state, zip, apt_num, session['email'])
+            cursor.execute("UPDATE shipping SET address = ?, apt_num = ?, city = ?, state = ?, zip = ? WHERE cust_id = ?;", (address, apt_num, city, state, zip, cust_id))
             conn.commit()
+
             cursor.close()
             conn.close()
 
@@ -630,6 +701,8 @@ def updateProfile():
 
         # if any errors/exceptions:
         except Exception as e:
+            
+            conn.rollback()
 
             # close connection to db
             cursor.close()

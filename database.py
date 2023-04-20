@@ -168,15 +168,33 @@ if not os.path.exists("data/database.db"):
 	cursor = None
 	conn = None
 	
+	# establish connection to database
 	conn = sqlite3.connect("data/database.db")
 	cursor = conn.cursor()
 
 
-	cursor.execute(" INSERT INTO customer (email, pass, fname, lname, phone) VALUES \
+	cursor.execute("INSERT INTO customer (email, pass, fname, lname, phone) VALUES \
 		('john.doe@example.com', 'password1', 'John', 'Doe', '123-456-7890'), \
 		('jane.doe@example.com', 'password2', 'Jane', 'Doe', '098-765-4321'), \
 		('leo@email.com', 'test', 'Leo', 'Benitez', '098-765-4321'), \
 		('jim.smith@example.com', 'password3', 'Jim', 'Smith', '555-555-5555');")
+    
+	conn.commit()
+	conn.close()
+
+	cursor = None
+	conn = None
+
+	# establish connection to database
+	conn = sqlite3.connect("data/database.db")
+	cursor = conn.cursor()
+
+
+	cursor.execute("INSERT INTO shipping (address, apt_num, city, state, zip, cust_id) VALUES \
+		('address1', 'apt1', 'atl', 'ga', '17890', '1'), \
+		('address2', 'apt2', 'atl', 'ga', '17890', '2'), \
+		('address3', 'apt3', 'atl', 'ga', '17890', '3'), \
+		('address4', 'apt4', 'atl', 'ga', '17890', '4');")
     
 	conn.commit()
 	conn.close()
