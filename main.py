@@ -143,11 +143,7 @@ def is_valid(email, password):
 def root():
     try:
         # get custome'r login session status
-        # loggedIn, fname, lname, noOfItems = getLoginDetails()
-        fname = ''
-        lname = ''
-        noOfItems = 0
-        loggedIn = False
+        loggedIn, fname, lname, noOfItems = getLoginDetails()
 
         # open connection to db
         conn = sqlite3.connect('data/database.db')
