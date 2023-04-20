@@ -51,57 +51,51 @@ def parse(data):
 
 # function to retrieve customer's login status
 def getLoginDetails():
+    try:
+        conn = sqlite3.connect("data/database.db")
+        cursor = conn.cursor()
 
-    # if customer not logged in:
-    if "email" not in session:
-        fname = ""
-        lname = ""
-        noOfItems = 0
-        loggedIn = False
-
-    # else, customer is already logged in:
-    else:
-
-        try:
-            # open connection to db
-            conn = sqlite3.connect("data/database.db")
-            cursor = conn.cursor()
+        # if customer not logged in:
+        if not session:
+            fname = ""
+            lname = ""
+            noOfItems = 0
+            loggedIn = False
+        
+        # else, customer is already logged in:
+        else:
 
             # from session, get customer's info
-            cursor.execute("SELECT cust_id, fname, lname FROM customer WHERE email = ?;", session['email'])
-            cust_id, fname, lname = cursor.fetchall()
+            cursor.execute("SELECT cust_id, fname, lname FROM customer WHERE email = ?;", (session['email'], ))
+            cust_id, fname, lname = cursor.fetchone()
 
             # from session, get cart info
-            cursor.execute("SELECT count(item_id) FROM cart WHERE userId = ?;", cust_id)
+            cursor.execute("SELECT COUNT(item_id) FROM cart WHERE cust_id = ?;", (cust_id, ))
             noOfItems = cursor.fetchone()[0]
 
-            # close connection to db
-            cursor.close()
-            conn.close()
             loggedIn = True
-            msg ={
-                'msg:' + str(cust_id)
-            }
-            resp = jsonify(msg)
-            return resp
-  
-        # if any errors/exceptions
-        except Exception as e:
             
-            # close connection to db
-            cursor.close()    
-            conn.close()
-            
-            msg = {
-                'status': 500,
-                'message': 'Error 1: ' + str(e)
-            }
-            resp = jsonify(msg)
-            resp.status_code = 500
-            return resp
+        # close connection to db
+        cursor.close()
+        conn.close()
 
-    # return data to caller
-    return (loggedIn, fname, lname, noOfItems)
+        # return data to caller
+        return (loggedIn, fname, lname, noOfItems)
+
+    # if any errors/exceptions:
+    except Exception as e:
+
+        # close connection to db
+        cursor.close()
+        conn.close()
+
+        msg = {
+            'status': 500,
+            'message': 'Error: ' + str(e)
+        }
+        resp = jsonify(msg)
+        resp.status_code = 500
+        return resp
 
 
 # function to verify login is valid:
@@ -153,7 +147,7 @@ def is_valid(email, password):
 def root():
     try:
         # get custome'r login session status
-        # loggedIn, fname, lname, noOfItems = getLoginDetails() or (False, '', '', 0)
+        loggedIn, fname, lname, noOfItems = getLoginDetails()
 
         # open connection to db
         conn = sqlite3.connect('data/database.db')
@@ -163,7 +157,7 @@ def root():
         cursor.execute('SELECT item_id, item, description, url, image, price, inventory FROM inventory')
         itemData = cursor.fetchall()
         data = parse(itemData)   
-        
+            
         # get categories for all items
         cursor.execute('SELECT DISTINCT category FROM inventory')
         categories = cursor.fetchall()
@@ -173,8 +167,7 @@ def root():
         conn.close()
 
         # return data to frontend
-        #  loggedIn=loggedIn, firstName=fname, lastName=lname, noOfItems=noOfItems,
-        return render_template('home.html', itemData=data, categoryData=categories)
+        return render_template('home.html', loggedIn=loggedIn, itemData=data, categoryData=categories, firstName=fname, lastName=lname, noOfItems=noOfItems)
 
     # if any errors/exceptions
     except Exception as e:  
@@ -185,6 +178,7 @@ def root():
         resp = jsonify(msg)
         resp.status_code = 500
         return resp
+
 
 # get categories for add to inventory route:
 @app.route("/add")
@@ -220,6 +214,7 @@ def admin():
         resp = jsonify(msg)
         resp.status_code = 500
         return resp
+
 
 # add inventory items from form route
 @app.route("/addItem", methods=["GET", "POST"])
@@ -278,6 +273,7 @@ def addItem():
             resp.status_code = 500
             return resp
 
+
 # get inventory data for removal route
 @app.route("/remove")
 def remove():
@@ -312,6 +308,7 @@ def remove():
         resp = jsonify(msg)
         resp.status_code = 500
         return resp
+
 
 # remove item from inventory route
 @app.route("/removeItem")
@@ -350,6 +347,7 @@ def removeItem():
         resp = jsonify(msg)
         resp.status_code = 500
         return resp
+
 
 # display categories for home 
 @app.route("/displayCategory")
@@ -396,6 +394,7 @@ def displayCategory():
         resp.status_code = 500
         return resp
 
+
 # get info for customer's profile route
 @app.route("/account/profile")
 def profileHome():
@@ -440,6 +439,7 @@ def profileHome():
         resp = jsonify(msg)
         resp.status_code = 500
         return resp
+
 
 # edit customer's info route
 @app.route("/account/profile/edit")
@@ -487,6 +487,7 @@ def editProfile():
         resp = jsonify(msg)
         resp.status_code = 500
         return resp
+
 
 # change password route 
 @app.route("/account/profile/changePassword", methods=["GET", "POST"])
@@ -586,6 +587,7 @@ def changePassword():
     else:
             return render_template("changePassword.html")
 
+
 # update profile information route
 @app.route("/updateProfile", methods=["GET", "POST"])
 def updateProfile():
@@ -641,6 +643,7 @@ def updateProfile():
     # else just render page
     return redirect(url_for('editProfile'))
 
+
 # login form route
 @app.route("/loginForm")
 def loginForm():
@@ -654,6 +657,7 @@ def loginForm():
     # else redirect customer to login page
     else:
         return render_template('login.html', error='')
+
 
 # login page route
 @app.route("/login", methods = ['POST', 'GET'])
@@ -677,6 +681,7 @@ def login():
         else:
             error = 'Invalid Email / Password'
             return render_template('login.html', error=error)
+
 
 # inventory item information route
 @app.route("/productDescription")
@@ -720,6 +725,7 @@ def productDescription():
     
     # return information to the frontend 
     return render_template("productDescription.html", data=item_data, loggedIn = loggedIn, firstName = fname, lastName = lname, noOfItems = noOfItems)
+
 
 # add item to cart route
 @app.route("/addToCart")
@@ -783,6 +789,7 @@ def addToCart():
     # redirect customer back to home page
     return redirect(url_for('root'))
 
+
 # get cart info route
 @app.route("/cart")
 def cart():
@@ -806,7 +813,7 @@ def cart():
         cursor = conn.cursor()
 
         # get cust_id from customer table with session email
-        cursor.execute("SELECT userId FROM users WHERE email = ?", email)
+        cursor.execute("SELECT cust_id FROM customer WHERE email = ?", email)
         
         # retrieve found record
         cust_id = cursor.fetchone()[0]
@@ -840,6 +847,7 @@ def cart():
     
     # return item info and total to frontend
     return render_template("cart.html", products = items, totalPrice=totalPrice, loggedIn=loggedIn, firstName=fname, lastName=lname, noOfItems=noOfItems)
+
 
 # remove items from cart route
 @app.route("/removeFromCart")
@@ -896,6 +904,7 @@ def removeFromCart():
     # redirect customer back to home page    
     return redirect(url_for('root'))
 
+
 # logout route
 @app.route("/logout")
 def logout():
@@ -912,6 +921,7 @@ def registrationForm():
 
     # render registration form
     return render_template("register.html")
+
 
 # POST register data after submit from registrationForm, route
 @app.route("/register", methods = ['GET', 'POST'])
@@ -969,6 +979,7 @@ def register():
 
     # return resp/result to frontend and route customer to login
     return render_template("login.html", msg=resp)
+
 
 # run flask app
 if __name__ == '__main__':

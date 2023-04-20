@@ -20,6 +20,7 @@ if not os.path.exists("data/database.db"):
 
 	cursor.execute(SQL_STATEMENT)
 	conn.commit()
+	cursor.close()
 	conn.close()
 
 # shipping table
@@ -43,6 +44,7 @@ if not os.path.exists("data/database.db"):
 
 	cursor.execute(SQL_STATEMENT)
 	conn.commit()
+	cursor.close()
 	conn.close()
 
 # service table 
@@ -72,6 +74,7 @@ if not os.path.exists("data/database.db"):
 
 	cursor.execute(SQL_STATEMENT)
 	conn.commit()
+	cursor.close()
 	conn.close()
 
 # recycle table
@@ -90,6 +93,7 @@ if not os.path.exists("data/database.db"):
 
 	cursor.execute(SQL_STATEMENT)
 	conn.commit()
+	cursor.close()
 	conn.close()
 
 # inventory table
@@ -114,6 +118,7 @@ if not os.path.exists("data/database.db"):
 
 	cursor.execute(SQL_STATEMENT)
 	conn.commit()
+	cursor.close()
 	conn.close()
 
 # cart table
@@ -132,6 +137,7 @@ if not os.path.exists("data/database.db"):
 
 	cursor.execute(SQL_STATEMENT)
 	conn.commit()
+	cursor.close()
 	conn.close()
 
 # order/history table
@@ -153,8 +159,49 @@ if not os.path.exists("data/database.db"):
 	
 	cursor.execute(SQL_STATEMENT)
 	conn.commit()
-	conn.close()
 	
+	# close connection to db
+	cursor.close()
+	conn.close
+
+# insert mockup data
+	cursor = None
+	conn = None
+	
+	conn = sqlite3.connect("data/database.db")
+	cursor = conn.cursor()
+
+
+	cursor.execute(" INSERT INTO customer (email, pass, fname, lname, phone) VALUES \
+		('john.doe@example.com', 'password1', 'John', 'Doe', '123-456-7890'), \
+		('jane.doe@example.com', 'password2', 'Jane', 'Doe', '098-765-4321'), \
+		('leo@email.com', 'test', 'Leo', 'Benitez', '098-765-4321'), \
+		('jim.smith@example.com', 'password3', 'Jim', 'Smith', '555-555-5555');")
+    
+	conn.commit()
+	conn.close()
+
+	cursor = None
+	conn = None
+	
+	# establish connection to database
+	conn = sqlite3.connect("data/database.db")
+	cursor = conn.cursor()
+
+	# insert mockup data into inventory table
+	cursor.execute("""
+    	INSERT INTO inventory (item, description, category, url, image, price, inventory)
+    	VALUES 
+        	("Product A", "This is the description for Product A", "Category A", "https://example.com/product-a", "image_a.jpg", 9.99, 10),
+        	("Product B", "This is the description for Product B", "Category B", "https://example.com/product-b", "image_b.jpg", 19.99, 20),
+        	("Product C", "This is the description for Product C", "Category A", "https://example.com/product-c", "image_c.jpg", 29.99, 30)
+		""")
+
+	# commit changes and close connection
+	conn.commit()
+	cursor.close()
+	conn.close()
+
 else:
 	conn = sqlite3.connect("data/database.db")
 	conn.close()
