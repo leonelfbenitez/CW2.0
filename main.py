@@ -799,6 +799,24 @@ def itemInformation():
     return render_template("productDescription.html", data=item_data, loggedIn = loggedIn, firstName = fname, lastName = lname, noOfItems = noOfItems)
 
 
+# customer Order information route
+@app.route("/account/orders")
+def orders():
+
+    # if customer is not logged in:
+    if 'email' not in session:
+
+        # redirect customer to login form
+        return redirect(url_for('loginForm'))
+    
+    # else, customer is already logged in:
+    else:
+        # get customer login status
+        loggedIn, fname, lname, noOfItems = getLoginDetails()
+
+    return render_template("orders.html", loggedIn = loggedIn, firstName = fname, lastName = lname, noOfItems = noOfItems)
+
+
 # add item to cart route
 @app.route("/addToCart")
 def addToCart():
