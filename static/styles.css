@@ -77,3 +77,33 @@
 	cursor: pointer;
 	transform: scale(1.1);
   }
+
+  .container {
+	display: flex;
+	flex-wrap: wrap;
+  }
+  
+  /* Set up the individual flex items */
+  .product {
+	width: 300px;
+	margin: 10px;
+	border: 1px solid #ccc;
+	text-align: center;
+	display: flex;
+	flex-direction: column;
+  }
+  
+  /* Style the product image */
+  .product img {
+	width: 100%;
+	height: auto;
+  }
+  
+  /* Style the product name and price */
+  .product h3 {
+	margin-top: 10px;
+  }
+  
+  .product p {
+	margin: 5px 0;
+  }

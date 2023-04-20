@@ -8,7 +8,13 @@
 	
 	<title>Computer World Online Computer Center!</title>
 </head>
-
+<nav>
+    <ul class="navbar">
+        <li><a href="/">Home</a></li>
+        <li><a href="/recycle.html">Recycle</a></li>
+        <li><a href="service.html">Service</a></li>
+    </ul>
+</nav>
 <body class="frame">
 
     <section class="header">
@@ -28,12 +34,7 @@
         <p style:"{color:red;}">{{ products }}</p>
         <hr>
         <!-- Search Box -->
-        <article>
-            <form>
-                <input id="searchBox" type="text" name="searchQuery">
-                <input id="searchButton" type="submit" value="Search">
-            </form>
-        </article>
+    
 
         <!-- Login -->
         <article class="top_btns">
@@ -76,27 +77,37 @@
             {% for data in itemData %}
             <table>
                 <tr id="productName">
-                    {% for row in data %}
+                    
                     <td>
-                        {{row[1]}}
+                        Nvidia 4080
                     </td>
-                    {% endfor %}
+                   <td>
+                        RTX 4070
+                   </td>
+                   <td>
+                        Dell Moniter
+                   </td>
                 </tr>
                 <tr id="productImage">
                     {% for row in data %}
                     <td>
                         <a href="/itemInformation?item_id={{row[0]}}">
-                            <img src={{ url_for('static', filename='uploads/' + row[5]) }} id="itemImage" />
+                            <img src={{ url_for('static', filename='static/uploads' + row[5]) }} id="itemImage" />
                         </a>
                     </td>
                     {% endfor %}
                 </tr>
                 <tr id="productPrice">
-                    {% for row in data %}
+                    
                     <td>
-                        ${{row[2]}}
+                        $1000
                     </td>
-                    {% endfor %}
+                    <td>
+                        $1500
+                    </td>
+                    <td>
+                        $300
+                    </td>
                 </tr>
             </table>
             {% endfor %}
