@@ -32,7 +32,7 @@ def parse(data):
         curr = [] # set array to store values per record
         
         # iterate the number of columns
-        for j in range(9):
+        for j in range(8):
 
             # if row iteration is over limit
             if i >= len(data):
@@ -107,7 +107,7 @@ def is_valid(email, password):
         cursor = conn.cursor()
 
         # retrieve email and password from customer table
-        cursor.execute('SELECT email, pass FROM customer WHERE email = ?;', session['email'])
+        cursor.execute('SELECT email, pass FROM customer WHERE email = ?;', (session['email'], ))
         data = cursor.fetchone()
 
         # close connection to db
@@ -154,13 +154,19 @@ def root():
         cursor = conn.cursor()
 
         # get inventory information to display
-        cursor.execute('SELECT item_id, item, description, url, image, price, inventory FROM inventory')
+        cursor.execute('SELECT item_id, item, description, category, url, image, price, inventory FROM inventory;')
         itemData = cursor.fetchall()
-        data = parse(itemData)   
-            
-        # get categories for all items
-        cursor.execute('SELECT DISTINCT category FROM inventory')
-        categories = cursor.fetchall()
+        data = parse(itemData)
+
+        # get category information to display
+        cursor.execute('SELECT DISTINCT category FROM inventory;')
+        catData = cursor.fetchall()
+
+        # create a list of category names by iterating over the tuples and extracting the first element
+        categoryData = [category[0] for category in catData]
+
+        # create a list of tuples with IDs starting from 0
+        categories = list(enumerate(categoryData))
 
         # close connection to db
         cursor.close()
@@ -190,7 +196,7 @@ def admin():
         cursor = conn.cursor()
 
         # get categories for all items
-        cursor.execute('SELECT DISTINCT category FROM inventory')
+        cursor.execute('SELECT DISTINCT category FROM inventory;')
         categories = cursor.fetchall()
 
         # close connection to db
@@ -242,7 +248,8 @@ def addItem():
             cursor = conn.cursor()
 
             # insert item data into table
-            cursor.execute('''INSERT INTO products (item, description, category, image, price, inventory) VALUES (?, ?, ?, ?, ?, ?)''', item, description, category, image, price, inventory)
+            cursor.execute('''INSERT INTO products (item, description, category, image, price, inventory) 
+                        VALUES (?, ?, ?, ?, ?, ?);''', (item, description, category, image, price, inventory))
             conn.commit()
 
             # close connection to db
@@ -284,7 +291,7 @@ def remove():
         cursor = conn.cursor()
         
         # get data for all items in inventory
-        cursor.execute('SELECT item_id, item, description, category, image, price, inventory FROM inventory')
+        cursor.execute('SELECT item_id, item, description, category, image, price, inventory FROM inventory;')
         results = cursor.fetchall()
 
         # close connection to db
@@ -323,7 +330,7 @@ def removeItem():
         cursor = conn.cursor()
         
         # delete given item from db
-        cursor.execute('DELETE FROM products WHERE productID = ?', item_id)
+        cursor.execute('DELETE FROM inventory WHERE item_id = ?;', (item_id, ))
         conn.commit()
 
         # close connection to db
@@ -355,17 +362,17 @@ def displayCategory():
     
     try:        
         # get customer's login status
-        loggedIn, fname, lname, noOfItems = getLoginDetails() or (False, '', '', 0)
+        loggedIn, fname, lname, noOfItems = getLoginDetails()
 
         # get selected category from frontend
-        categoryId = request.args.get("categoryId")
+        category = request.args.get("category")
 
         # open connection to db
         conn = sqlite3.connect('data/database.db')
         cursor = conn.cursor()
         
         # get available inventory for selected category
-        cursor.execute('SELECT item_id, item, description, category, image, price, inventory FROM inventory')
+        cursor.execute('SELECT item_id, item, description, category, image, price, inventory FROM inventory WHERE category = ?;', (category, ))
         results = cursor.fetchall()
         
         # close connection to db
@@ -373,18 +380,14 @@ def displayCategory():
         conn.close()
 
         # get list of categories
-        categoryNames = results[0][3]
-        data = parse(categoryNames)
+        categoryNames = results[0][1]
+        data = parse(results)
 
         # forward categories to frontend
         return render_template('displayCategory.html', data=data, loggedIn=loggedIn, firstName=fname, lastName=lname, noOfItems=noOfItems, categoryName=categoryNames)
     
     # if any errors/exceptions
     except Exception as e:
-        
-        # close connection to db
-        cursor.close()    
-        conn.close()
         
         msg = {
             'status': 500,
@@ -412,11 +415,11 @@ def profileHome():
         cursor = conn.cursor()
 
         # get customer's info
-        cursor.execute("SELECT email, phone, sign_up FROM users WHERE email = ?", session['email'])
+        cursor.execute("SELECT email, phone, sign_up FROM customer WHERE email = ?;", (session['email'], ))
         results = cursor.fetchall()
 
         # get custome'r login session status
-        loggedIn, fname, lname, noOfItems = getLoginDetails() or (False, '', '', 0)
+        loggedIn, fname, lname, noOfItems = getLoginDetails()
 
         # close connection to db
         cursor.close()    
@@ -684,13 +687,13 @@ def login():
 
 
 # inventory item information route
-@app.route("/productDescription")
-def productDescription():
+@app.route("/itemInformation")
+def itemInformation():
 
     # get customer login status
-    loggedIn, fname, lname, noOfItems = getLoginDetails() or (False, '', '', 0)
+    loggedIn, fname, lname, noOfItems = getLoginDetails()
 
-    # get the item_id selected from frontend
+    # get the item_id selected from frontend url request
     item_id = request.args.get('item_id')
 
 
@@ -741,20 +744,20 @@ def addToCart():
     else:
 
         # get selected item info from frontend
-        item_id = int(request.args.get('productId'))
+        item_id = int(request.args.get('item_id'))
         try: 
             # open connection to db
             conn = sqlite3.connect('data/database.db')
             cursor = conn.cursor()
             
             # get customer's cust_id
-            cursor.execute("SELECT cust_id FROM customer WHERE email = ?", session['email'])
+            cursor.execute("SELECT cust_id FROM customer WHERE email = ?", (session['email'], ))
             
             # retrieve result row
             cust_id = cursor.fetchone()[0]
 
             # update cart table
-            cursor.execute("INSERT INTO cart (cust_id, item_id) VALUES (?, ?)", cust_id, item_id)
+            cursor.execute("INSERT INTO cart (cust_id, item_id) VALUES (?, ?)", (cust_id, item_id))
             conn.commit()
 
                 
@@ -802,29 +805,36 @@ def cart():
     
     # else customer is already logged in:
     # get customer login status
-    loggedIn, fname, lname, noOfItems = getLoginDetails() or (False, '', '', 0)
+    loggedIn, fname, lname, noOfItems = getLoginDetails()
     
     # get current customer's session email; login info
     email = session['email']
-
+    items = 0
+    totalPrice = 0
+    
     try:
         # open connection to db
         conn = sqlite3.connect('data/database.db')
         cursor = conn.cursor()
 
         # get cust_id from customer table with session email
-        cursor.execute("SELECT cust_id FROM customer WHERE email = ?", email)
+        cursor.execute("SELECT cust_id FROM customer WHERE email = ?", (email, ))
         
         # retrieve found record
         cust_id = cursor.fetchone()[0]
 
         # get item info that are in the cart table
-        cursor.execute("SELECT i.item_id, i.item, i.price, i.image FROM inventory i, cart c WHERE i.item_id = c.item_id AND c.cust_id = ?", cust_id)
+        cursor.execute("SELECT i.item_id, i.item, i.price, i.image FROM inventory i, cart c WHERE i.item_id = c.item_id AND c.cust_id = ?", (cust_id, ))
         items = cursor.fetchall()
 
         # close connection to db
         cursor.close()
         conn.close()
+
+        # total process:    
+        totalPrice = 0
+        for row in items:
+            totalPrice += row[2]
 
     # if any errors/exceptions:
     except Exception as e:
@@ -839,11 +849,6 @@ def cart():
         }
         resp = jsonify(msg)
         resp.status_code = 500
-
-    # total process:    
-    totalPrice = 0
-    for row in items:
-        totalPrice += row[2]
     
     # return item info and total to frontend
     return render_template("cart.html", products = items, totalPrice=totalPrice, loggedIn=loggedIn, firstName=fname, lastName=lname, noOfItems=noOfItems)
@@ -864,7 +869,7 @@ def removeFromCart():
     email = session['email']
 
     # get selected item
-    item_id = int(request.args.get('productId'))
+    item_id = int(request.args.get('item_id'))
 
     try:
         # connect to the db
@@ -872,11 +877,11 @@ def removeFromCart():
         cursor = conn.cursor()
         
         # retrieve cust_id from customer table
-        cursor.execute("SELECT cust_id FROM customer WHERE email = ?", email)
+        cursor.execute("SELECT cust_id FROM customer WHERE email = ?", (email, ))
         cust_id = cursor.fetchone()[0]
         
         # delete item/record from cart
-        cursor.execute("DELETE FROM cart WHERE cust_id = ? AND item_id = ?", cust_id, item_id)
+        cursor.execute("DELETE FROM cart WHERE cust_id = ? AND item_id = ?", (cust_id, item_id, ))
         conn.commit()
         
         # OK

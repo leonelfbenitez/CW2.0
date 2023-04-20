@@ -13,7 +13,7 @@
         <tr>
             {% for row in data %}
             <td>
-                <a href="/removeItem?productId={{row[0]}}">
+                <a href="/removeItem?item_id={{row[0]}}">
                     {% if i == 4 %}
                     <img src={{ url_for('static', filename='uploads/' + row[i]) }} id="itemImage" />
                     {% else %}

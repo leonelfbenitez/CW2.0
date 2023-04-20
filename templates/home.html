@@ -25,7 +25,7 @@
             </a>
         </article>
         <hr>
-        <p style:"{color:red;}">{{ loggedIn }}</p>
+        <p style:"{color:red;}">{{ products }}</p>
         <hr>
         <!-- Search Box -->
         <article>
@@ -67,7 +67,7 @@
             <h2>Shop by Category: </h2>
             <ul>
                 {% for row in categoryData %}
-                <li><a href="/displayCategory?categoryId={{row[0]}}">{{row[1]}}</a></li>
+                <li><a href="/displayCategory?category={{row[1]}}">{{row[1]}}</a></li>
                 {% endfor %}
             </ul>
         </div>
@@ -85,8 +85,8 @@
                 <tr id="productImage">
                     {% for row in data %}
                     <td>
-                        <a href="/productDescription?productId={{row[0]}}">
-                            <img src={{ url_for('static', filename='uploads/' + row[4]) }} id="itemImage" />
+                        <a href="/itemInformation?item_id={{row[0]}}">
+                            <img src={{ url_for('static', filename='uploads/' + row[5]) }} id="itemImage" />
                         </a>
                     </td>
                     {% endfor %}
